@@ -92,6 +92,8 @@ const utteranceTranscript = (req, flag, oc = '') => {
     }
 };
 
+const REGEXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+
 const handleLiveChatRequest = (req) => {
 
     let outputContexts = req.body.queryResult.outputContexts;
@@ -156,18 +158,33 @@ const handleLiveChatRequest = (req) => {
             transcript: transcript
         }, true, oc);
     } else if (phone === undefined) {
-        outString += `Finally, what is the best phone number to reach you?`;
-        let awaitPhone = `${session}/contexts/await-phone`;
-        let oc = [{
-            name: awaitPhone,
-            lifespanCount: 1
-        }];
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true, oc);
+        if (!REGEXP.test(email.toLowerCase())) {
+            outString += `Please enter a valid email address or enter Skip to continue.`;
+            let awaitEmail = `${session}/contexts/await-email`;
+            let oc = [{
+                name: awaitEmail,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `Finally, what is the best phone number to reach you?`;
+            let awaitPhone = `${session}/contexts/await-phone`;
+            let oc = [{
+                name: awaitPhone,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        }
     } else {
         // validate the phone number
         if (String(phone).length < 10) {
@@ -199,8 +216,6 @@ const handleLiveChatRequest = (req) => {
         }
     }
 };
-
-const REGEXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const handleNewClientCallbackRequest = (req) => {
 
