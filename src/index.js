@@ -169,20 +169,38 @@ const handleLiveChatRequest = (req) => {
             transcript: transcript
         }, true, oc);
     } else {
-        outString += `I'll connect you with our staff now. ::next-2000::Please standby to chat live or call <%phone%> for immediate assistance.`;
-        let operatorRequest = `${session}/contexts/OPERATOR_REQUEST`;
-        let oc = [{
-            name: operatorRequest,
-            lifespanCount: 1
-        }];
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true, oc);
+        // validate the phone number
+        if (String(phone).length < 10) {
+            outString += `Please enter a valid 10 digit phone number.`;
+            let awaitPhone = `${session}/contexts/await-phone`;
+            let oc = [{
+                name: awaitPhone,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `I'll connect you with our staff now. ::next-2000::Please standby to chat live or call <%phone%> for immediate assistance.`;
+            let operatorRequest = `${session}/contexts/OPERATOR_REQUEST`;
+            let oc = [{
+                name: operatorRequest,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        }
     }
 };
+
+const REGEXP = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
 const handleNewClientCallbackRequest = (req) => {
 
@@ -248,26 +266,58 @@ const handleNewClientCallbackRequest = (req) => {
             transcript: transcript
         }, true, oc);
     } else if (email === undefined) {
-        outString += `Finally, what is your email address?`;
-        let awaitEmailNCCR = `${session}/contexts/await-email-nccr`;
-        let oc = [{
-            name: awaitEmailNCCR,
-            lifespanCount: 1
-        }];
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true, oc);
+        // validate the phone number
+        if (String(phone).length < 10) {
+            outString += `Please enter a valid 10 digit phone number.`;
+            let awaitPhoneNCCR = `${session}/contexts/await-phone-nccr`;
+            let oc = [{
+                name: awaitPhoneNCCR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `Finally, what is your email address?`;
+            let awaitEmailNCCR = `${session}/contexts/await-email-nccr`;
+            let oc = [{
+                name: awaitEmailNCCR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        }
     } else {
-        outString += `You are all set! A customer support agent will be in touch ASAP. Is there anything else I can help you with? <button type="button" class"quick_reply">Disconnect</button>`;
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true);
+        // validate email address
+        if (!REGEXP.test(email.toLowerCase())) {
+            outString += `Please enter a valid email address or enter Skip to continue.`;
+            let awaitEmailNCCR = `${session}/contexts/await-email-nccr`;
+            let oc = [{
+                name: awaitEmailNCCR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `You are all set! A customer support agent will be in touch ASAP. Is there anything else I can help you with? <button type="button" class"quick_reply">Disconnect</button>`;
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true);
+        }
     }
 };
 
@@ -363,26 +413,58 @@ const handleSmartchatDemoRequest = (req) => {
             transcript: transcript
         }, true, oc);
     } else if (email === undefined) {
-        outString += `Finally, what is your email address for the appointment confirmation?`;
-        let awaitEmailSDR = `${session}/contexts/await-email-sdr`;
-        let oc = [{
-            name: awaitEmailSDR,
-            lifespanCount: 1
-        }];
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true, oc);
+        // if the phone number does not have ten digits
+        if (String(phone).length < 10) {
+            outString += `Please enter a valid 10 digit phone number.`;
+            let awaitPhoneSDR = `${session}/contexts/await-phone-sdr`;
+            let oc = [{
+                name: awaitPhoneSDR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `Finally, what is your email address for the appointment confirmation?`;
+            let awaitEmailSDR = `${session}/contexts/await-email-sdr`;
+            let oc = [{
+                name: awaitEmailSDR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        }
     } else {
-        outString += `Thanks ${first_name}!::next-1000::We'll be in touch shortly to schedule your SmartChat platform demo.<button type="button" class"quick_reply">Disconnect</button>`;
-        return utteranceTranscript({
-            fulfillmentText: outString,
-            queryText: queryText,
-            session: session,
-            transcript: transcript
-        }, true);
+        // Verify email address
+        if (!REGEXP.test(email.toLowerCase())) {
+            outString += `Please enter a valid email address or enter Skip to continue.`;
+            let awaitEmailSDR = `${session}/contexts/await-email-sdr`;
+            let oc = [{
+                name: awaitEmailSDR,
+                lifespanCount: 1
+            }];
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true, oc);
+        } else {
+            outString += `Thanks ${first_name}!::next-1000::We'll be in touch shortly to schedule your SmartChat platform demo.<button type="button" class"quick_reply">Disconnect</button>`;
+            return utteranceTranscript({
+                fulfillmentText: outString,
+                queryText: queryText,
+                session: session,
+                transcript: transcript
+            }, true);
+        }
     }
 };
 
